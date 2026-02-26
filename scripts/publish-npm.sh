@@ -41,7 +41,10 @@ echo "==> Packing preview"
 npm publish --dry-run
 
 echo "==> Publishing"
-npm publish --provenance --access public
+# Manual local publishes do not support automatic provenance generation
+# (npm returns: "Automatic provenance generation not supported for provider: null").
+# Provenance stays enabled in the GitHub Actions trusted-publisher workflow.
+npm publish --access public
 
 echo "==> Verifying registry"
 npm view "$pkg_name" version dist-tags.latest

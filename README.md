@@ -155,6 +155,8 @@ npm run publish:manual
 
 This runs typecheck/tests/build, verifies npm auth, ensures version is not already published, then publishes.
 
+Note: local/manual publish does **not** include `--provenance` (npm requires a supported CI provider for automatic provenance). Provenance is handled by the GitHub Actions trusted-publisher workflow.
+
 ## Architecture notes
 
 - `src/cli.ts`: command tree and handlers
