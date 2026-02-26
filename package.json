@@ -1,11 +1,11 @@
 {
   "name": "@andreasnlarsen/calcom-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Production-ready Cal.com CLI for personal scheduling workflows",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/andreasnlarsen/calcom-cli"
+    "url": "git+https://github.com/andreasnlarsen/calcom-cli.git"
   },
   "homepage": "https://github.com/andreasnlarsen/calcom-cli#readme",
   "bugs": {
