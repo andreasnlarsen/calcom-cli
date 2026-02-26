@@ -2,15 +2,21 @@
 
 This document translates Andreas’s real workflow into product jobs and feature priorities.
 
-## Prioritized jobs
+## Prioritized jobs (expanded P0 → P3)
 
 | Priority | Job to be done | Frequency | Why it matters | CLI capability |
 |---|---|---:|---|---|
-| P0 | Override availability for a specific day | High | Fast control when plans change | `availability override set/clear/list` |
-| P1 | Modify regular availability windows | Medium-High | Keep baseline schedule accurate | `availability window set/list` |
-| P1 | Share meeting links quickly | High | Frequent outbound scheduling flow | `link list`, `link share` |
-| P2 | Inspect schedule state before changing | Medium | Prevent mistakes/overwrites | `schedule show`, `--dry-run` |
-| P3 | Create new meeting links (event types) | Low (rare) | Needed occasionally for new offers | `link create` |
+| P0 | Override availability for a specific day | High | Fast control when plans change | `avail override set/clear/list` |
+| P0 | Share existing booking links fast | High | Keeps outbound scheduling flow fast in chats/DMs | `link list`, `link share` |
+| P0 | Quick slot check before sharing | High | Avoids sharing links that won’t convert due to poor availability | `slot check` |
+| P1 | Modify recurring weekly availability windows | Medium-High | Keep baseline schedule accurate over time | `avail window set/list` |
+| P1 | Booking triage (today/upcoming) | Medium-High | Operational clarity without opening web dashboard | `booking list --today/--upcoming` |
+| P1 | Cancel / reschedule bookings from CLI | Medium | Reduce friction when plans shift | `booking cancel`, `booking reschedule` |
+| P2 | Create and manage private links | Medium | Controlled sharing for special cases (expiry/usage limits) | `link private create/list/update/delete` |
+| P2 | Adjust event-type booking guardrails | Medium | Prevent low-quality bookings and reduce scheduling noise | `link update` (buffers, notice, booking window, limits) |
+| P3 | Routing-form slot calculation | Low | Useful for advanced qualification/routing workflows | `routing calc-slots` |
+| P3 | Destination calendar switching | Low | Advanced setup and edge-case admin needs | `calendar destination set` |
+| P3 | Webhook management | Low | Infra/automation administration | `webhook list/create/update/delete` |
 
 ## Job stories
 
@@ -56,19 +62,28 @@ This document translates Andreas’s real workflow into product jobs and feature
 
 ## Feature sequencing
 
-### Phase 1 (must-have)
+### Phase P0 (must-have, first ship)
 1. Auth + config
 2. `schedule list/show`
-3. `availability override set/clear/list`
-4. Validation + dry-run + confirmation
+3. `avail override set/clear/list`
+4. `link list/share`
+5. `slot check`
+6. Validation + dry-run + confirmation
 
-### Phase 2 (high leverage)
-1. `link list`
-2. `link share --slug`
+### Phase P1 (core operator expansion)
+1. `avail window set/list`
+2. `booking list --today/--upcoming`
+3. `booking cancel`
+4. `booking reschedule`
 
-### Phase 3 (rare flow)
-1. `link create`
-2. optional `link update`
+### Phase P2 (controlled scale)
+1. `link private create/list/update/delete`
+2. event-type guardrails via `link update`
+
+### Phase P3 (advanced/admin)
+1. `routing calc-slots`
+2. `calendar destination set`
+3. `webhook list/create/update/delete`
 
 ## Senior-dev implementation notes
 
