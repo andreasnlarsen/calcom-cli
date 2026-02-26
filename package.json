@@ -1,6 +1,6 @@
 {
   "name": "@andreasnlarsen/calcom-cli",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Production-ready Cal.com CLI for personal scheduling workflows",
   "license": "MIT",
   "repository": {
