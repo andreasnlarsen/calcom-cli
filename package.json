@@ -28,7 +28,8 @@
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "publish:manual": "./scripts/publish-npm.sh"
   },
   "engines": {
     "node": ">=20"

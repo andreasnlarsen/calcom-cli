@@ -2,6 +2,12 @@
 
 A production-ready Node.js TypeScript CLI for Cal.com personal-account workflows.
 
+## Important legal / brand notice
+
+- This project is **unofficial** and is **not affiliated with, endorsed by, or sponsored by Cal.com**.
+- Cal.com name is used for API compatibility/reference.
+- Never commit or share API keys/tokens in source code or logs.
+
 ## Install
 
 ```bash
@@ -122,6 +128,32 @@ npm install
 npm test
 npm run build
 ```
+
+## Publishing (same model as whoop-cli)
+
+### Trusted publishing (recommended)
+
+This repo includes `.github/workflows/npm-publish.yml` for npm OIDC trusted publishing with provenance.
+
+Release flow:
+
+1. Bump `package.json` version.
+2. Commit + push.
+3. Create and push a matching tag: `v<version>`.
+4. GitHub Action publishes to npm.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+### Manual fallback publish
+
+```bash
+npm run publish:manual
+```
+
+This runs typecheck/tests/build, verifies npm auth, ensures version is not already published, then publishes.
 
 ## Architecture notes
 
