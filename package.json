@@ -3,12 +3,21 @@
   "version": "0.1.0",
   "description": "Production-ready Cal.com CLI for personal scheduling workflows",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andreasnlarsen/calcom-cli"
+  },
+  "homepage": "https://github.com/andreasnlarsen/calcom-cli#readme",
+  "bugs": {
+    "url": "https://github.com/andreasnlarsen/calcom-cli/issues"
+  },
   "type": "module",
   "bin": {
     "calcom": "dist/bin.js"
   },
   "files": [
     "dist",
+    "openclaw-skill",
     "README.md",
     "LICENSE"
   ],

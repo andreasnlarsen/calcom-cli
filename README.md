@@ -14,6 +14,19 @@ Run with:
 calcom --help
 ```
 
+## OpenClaw skill (bundled)
+
+The npm package includes a bundled OpenClaw skill at `openclaw-skill/SKILL.md`.
+
+Install it into your OpenClaw workspace:
+
+```bash
+calcom openclaw install-skill --force
+```
+
+Default target:
+`~/.openclaw/workspace/skills/calcom-cli/SKILL.md`
+
 ## Authentication and safety model
 
 `calcom` supports two auth sources:
@@ -96,6 +109,12 @@ Write commands support:
 - `--dry-run` to inspect payload before writing
 - `--yes` to bypass confirmation prompts
 
+OpenClaw helper command:
+
+```bash
+calcom openclaw install-skill --force
+```
+
 ## Development
 
 ```bash
@@ -112,6 +131,7 @@ npm run build
 - `src/config.ts` / `src/auth.ts`: local config and auth resolution
 - `src/payloads.ts`: isolated write payload builders (unit-tested)
 - `src/validators.ts`: shared zod validation
+- `openclaw-skill/SKILL.md`: bundled skill for OpenClaw usage
 
 ## Roadmap (out of scope for this release)
 

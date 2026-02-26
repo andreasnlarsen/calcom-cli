@@ -1,3 +1,8 @@
+import { constants } from 'node:fs';
+import { access, copyFile, mkdir } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Command } from 'commander';
 import {
   cancelBooking,
@@ -8,7 +13,6 @@ import {
   listSchedules,
   patchSchedule,
   rescheduleBooking,
-  type CalSchedule,
 } from './api/calcom.js';
 import { CalApiClient } from './api/client.js';
 import { getAuthToken, maskSecret, readTimezone, setAuth } from './auth.js';
@@ -61,6 +65,7 @@ export function createCli(): Command {
   configureLink(program);
   configureSlot(program);
   configureBooking(program);
+  configureOpenclaw(program);
 
   return program;
 }
@@ -596,6 +601,57 @@ function configureBooking(program: Command): void {
     );
 }
 
+function configureOpenclaw(program: Command): void {
+  const openclaw = program.command('openclaw').description('OpenClaw helper commands');
+
+  openclaw
+    .command('install-skill')
+    .description('Install bundled calcom-cli OpenClaw skill into ~/.openclaw/workspace/skills/calcom-cli')
+    .option('--openclaw-home <path>', 'Override OpenClaw home directory', defaultOpenclawHome())
+    .option('--force', 'Overwrite existing SKILL.md if present', false)
+    .action(
+      withErrorHandling(async (options, cmd) => {
+        const openclawHome = String(options.openclawHome ?? defaultOpenclawHome());
+        const targetDir = join(openclawHome, 'workspace', 'skills', 'calcom-cli');
+        const targetFile = join(targetDir, 'SKILL.md');
+
+        const sourceFile = join(
+          dirname(fileURLToPath(import.meta.url)),
+          '..',
+          'openclaw-skill',
+          'SKILL.md',
+        );
+
+        const exists = await canRead(targetFile);
+        if (exists && !options.force) {
+          throw new CliError('Target skill file already exists. Re-run with --force to overwrite.', 'ALREADY_EXISTS', {
+            targetFile,
+          });
+        }
+
+        await mkdir(targetDir, { recursive: true });
+        await copyFile(sourceFile, targetFile);
+
+        printResult(Boolean(getGlobals(cmd).json), `Installed skill to ${targetFile}.`, {
+          installed: true,
+          targetFile,
+          force: Boolean(options.force),
+        });
+      }),
+    );
+}
+
+const defaultOpenclawHome = (): string => join(homedir(), '.openclaw');
+
+async function canRead(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function buildRuntime(cmd: Command): Promise<RuntimeContext> {
   const globals = getGlobals(cmd);
   const config = await readConfig();
@@ -671,6 +727,3 @@ function normalizeError(error: unknown): CliError {
   return new CliError('Unknown error', 'UNEXPECTED_ERROR', error);
 }
 
-function _assertScheduleShape(_value: CalSchedule): void {
-  // compile-time anchor for imported type usage.
-}
