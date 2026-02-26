@@ -12,7 +12,7 @@ export async function listSchedules(client: CalApiClient): Promise<CalSchedule[]
   const response = await client.request<Record<string, unknown>>('/v2/schedules', {
     endpoint: 'schedules',
   });
-  return coerceArray(response, ['data', 'schedules']) as CalSchedule[];
+  return coerceArray(response, ['data', 'schedules']) as unknown as CalSchedule[];
 }
 
 export async function getSchedule(client: CalApiClient, scheduleId: string): Promise<CalSchedule> {
