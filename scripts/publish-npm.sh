@@ -41,7 +41,7 @@ echo "==> Packing preview"
 npm publish --dry-run
 
 echo "==> Publishing"
-npm publish --access public
+npm publish --provenance --access public
 
 echo "==> Verifying registry"
 npm view "$pkg_name" version dist-tags.latest
