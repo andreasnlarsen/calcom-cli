@@ -65,6 +65,7 @@ export function createCli(): Command {
   configureLink(program);
   configureSlot(program);
   configureBooking(program);
+  configureDoctor(program);
   configureOpenclaw(program);
 
   return program;
@@ -601,26 +602,85 @@ function configureBooking(program: Command): void {
     );
 }
 
+function configureDoctor(program: Command): void {
+  program
+    .command('doctor')
+    .description('Check auth/config and OpenClaw skill installation state')
+    .option('--openclaw-home <path>', 'Override OpenClaw home directory', defaultOpenclawHome())
+    .action(
+      withErrorHandling(async (options, cmd) => {
+        const globals = getGlobals(cmd);
+        const config = await readConfig();
+        const timezone = await readTimezone(config, globals.timezone);
+        const envToken = process.env.CALCOM_API_KEY?.trim();
+        const configToken = config.apiKey?.trim();
+        const token = envToken ?? configToken;
+        const source = envToken ? 'env' : configToken ? 'config' : 'none';
+
+        const configPath = getConfigPath();
+        const configExists = await canRead(configPath);
+
+        const openclawHome = String(options.openclawHome ?? defaultOpenclawHome());
+        const defaultSkillPath = getDefaultSkillTargetFile(openclawHome);
+        const skillInstalled = await canRead(defaultSkillPath);
+
+        const report = {
+          ok: Boolean(token),
+          auth: {
+            authenticated: Boolean(token),
+            source,
+            tokenPreview: token ? maskSecret(token) : null,
+          },
+          timezone,
+          config: {
+            path: configPath,
+            exists: configExists,
+          },
+          openclawSkill: {
+            defaultPath: defaultSkillPath,
+            installed: skillInstalled,
+            installCommand: 'calcom openclaw install-skill --force',
+          },
+        };
+
+        if (Boolean(globals.json)) {
+          printJson(report);
+          return;
+        }
+
+        process.stdout.write(`Auth: ${report.auth.authenticated ? `configured (${report.auth.source})` : 'missing'}\n`);
+        process.stdout.write(`Timezone: ${report.timezone}\n`);
+        process.stdout.write(`Config: ${report.config.path} (${report.config.exists ? 'exists' : 'not found'})\n`);
+        process.stdout.write(
+          `OpenClaw skill: ${report.openclawSkill.installed ? 'installed' : 'missing'} at ${report.openclawSkill.defaultPath}\n`,
+        );
+
+        if (!report.auth.authenticated) {
+          process.stdout.write('Fix auth: calcom auth set --api-key <key>\n');
+        }
+        if (!report.openclawSkill.installed) {
+          process.stdout.write(`Install skill: ${report.openclawSkill.installCommand}\n`);
+        }
+      }),
+    );
+}
+
 function configureOpenclaw(program: Command): void {
   const openclaw = program.command('openclaw').description('OpenClaw helper commands');
 
   openclaw
     .command('install-skill')
-    .description('Install bundled calcom-cli OpenClaw skill into ~/.openclaw/workspace/skills/calcom-cli')
+    .description('Install bundled calcom-cli OpenClaw skill into local OpenClaw workspace (or custom path)')
     .option('--openclaw-home <path>', 'Override OpenClaw home directory', defaultOpenclawHome())
+    .option('--target-file <path>', 'Install to explicit destination file path')
     .option('--force', 'Overwrite existing SKILL.md if present', false)
     .action(
       withErrorHandling(async (options, cmd) => {
         const openclawHome = String(options.openclawHome ?? defaultOpenclawHome());
-        const targetDir = join(openclawHome, 'workspace', 'skills', 'calcom-cli');
-        const targetFile = join(targetDir, 'SKILL.md');
+        const defaultTargetFile = getDefaultSkillTargetFile(openclawHome);
+        const targetFile = String(options.targetFile ?? defaultTargetFile);
 
-        const sourceFile = join(
-          dirname(fileURLToPath(import.meta.url)),
-          '..',
-          'openclaw-skill',
-          'SKILL.md',
-        );
+        const sourceFile = getBundledSkillSourceFile();
 
         const exists = await canRead(targetFile);
         if (exists && !options.force) {
@@ -629,12 +689,14 @@ function configureOpenclaw(program: Command): void {
           });
         }
 
-        await mkdir(targetDir, { recursive: true });
+        await mkdir(dirname(targetFile), { recursive: true });
         await copyFile(sourceFile, targetFile);
 
         printResult(Boolean(getGlobals(cmd).json), `Installed skill to ${targetFile}.`, {
           installed: true,
           targetFile,
+          defaultTargetFile,
+          sourceFile,
           force: Boolean(options.force),
         });
       }),
@@ -642,6 +704,12 @@ function configureOpenclaw(program: Command): void {
 }
 
 const defaultOpenclawHome = (): string => join(homedir(), '.openclaw');
+
+const getDefaultSkillTargetFile = (openclawHome: string): string =>
+  join(openclawHome, 'workspace', 'skills', 'calcom-cli', 'SKILL.md');
+
+const getBundledSkillSourceFile = (): string =>
+  join(dirname(fileURLToPath(import.meta.url)), '..', 'openclaw-skill', 'SKILL.md');
 
 async function canRead(path: string): Promise<boolean> {
   try {

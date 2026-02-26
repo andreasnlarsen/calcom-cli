@@ -25,6 +25,7 @@ Prefer `CALCOM_API_KEY` env var for ephemeral/runtime auth.
 - Use `--yes` only when non-interactive confirmation is intentionally skipped.
 - Use `--json` when another agent/script will parse output.
 - Default timezone is `Europe/Oslo`; override per command with `--timezone`.
+- Run `calcom doctor --json` before first live operation in a new environment.
 
 ## Core commands
 
@@ -67,5 +68,13 @@ Install this skill into OpenClaw workspace:
 calcom openclaw install-skill --force
 ```
 
-Default target:
+Default target (machine-local):
 `~/.openclaw/workspace/skills/calcom-cli/SKILL.md`
+
+Optional custom target:
+
+```bash
+calcom openclaw install-skill --target-file "$HOME/.openclaw/workspace/skills/custom-calcom/SKILL.md" --force
+```
+
+The install command prints the exact installed path so it can be moved/copied as needed.

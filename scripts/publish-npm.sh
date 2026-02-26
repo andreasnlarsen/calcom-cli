@@ -46,11 +46,23 @@ echo "==> Publishing"
 # Provenance stays enabled in the GitHub Actions trusted-publisher workflow.
 npm publish --access public
 
-echo "==> Verifying registry"
+echo "==> Verifying registry (wait for expected version)"
+for i in {1..18}; do
+  current=$(npm view "$pkg_name" version 2>/dev/null || true)
+  if [[ "$current" == "$pkg_version" ]]; then
+    echo "Registry version confirmed: $current"
+    break
+  fi
+  if [[ $i -eq 18 ]]; then
+    echo "ERROR: Registry did not show $pkg_name@$pkg_version after waiting. Last seen: ${current:-<none>}"
+    exit 1
+  fi
+  sleep 5
+done
 npm view "$pkg_name" version dist-tags.latest
 
 echo "==> Smoke tests"
-npx -y "$pkg_name" --help >/tmp/npm_npx_help.out
+npx -y "$pkg_name@$pkg_version" --help >/tmp/npm_npx_help.out
 head -n 8 /tmp/npm_npx_help.out
 
 echo "SUCCESS: Published $pkg_name@$pkg_version"

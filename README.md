@@ -30,8 +30,16 @@ Install it into your OpenClaw workspace:
 calcom openclaw install-skill --force
 ```
 
-Default target:
+Default target is machine-local:
 `~/.openclaw/workspace/skills/calcom-cli/SKILL.md`
+
+Custom target path is supported:
+
+```bash
+calcom openclaw install-skill --target-file "$HOME/.openclaw/workspace/skills/custom-calcom/SKILL.md" --force
+```
+
+The command always prints where the skill was installed.
 
 ## Authentication and safety model
 
@@ -119,6 +127,13 @@ OpenClaw helper command:
 
 ```bash
 calcom openclaw install-skill --force
+```
+
+Doctor command (quick health check):
+
+```bash
+calcom doctor
+calcom doctor --json
 ```
 
 ## Development
